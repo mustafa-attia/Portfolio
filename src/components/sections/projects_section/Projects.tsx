@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { projectKeys } from "../../../queries/projects.queries";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import PortfolioCard from "./ProjectCard";
 import "./Projects.css";
@@ -35,6 +36,8 @@ export default function Projects() {
   const descRef         = useRef<HTMLParagraphElement>(null);
   const countRef        = useRef<HTMLSpanElement>(null);
   const cardRefs        = useRef<(HTMLElement | null)[]>([]);
+  const sliderRef       = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   /* ── Entrance animation ─────────────────────────────────────────────── */
   useEffect(() => {
@@ -103,11 +106,46 @@ export default function Projects() {
       { threshold: 0 },
     );
 
-    const gridEl = sectionRef.current?.querySelector(".proj-grid");
-    if (gridEl) observer.observe(gridEl);
+    const sliderEl = sliderRef.current;
+    if (sliderEl) observer.observe(sliderEl);
 
     return () => observer.disconnect();
   }, [projects]);
+
+  function updateActiveSlide() {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const slides = Array.from(slider.children);
+    const nextIndex = slides.reduce(
+      (closestIndex, slide, index) => {
+        const closestSlide = slides[closestIndex];
+        return Math.abs(slide.getBoundingClientRect().left - slider.getBoundingClientRect().left) <
+          Math.abs(closestSlide.getBoundingClientRect().left - slider.getBoundingClientRect().left)
+          ? index
+          : closestIndex;
+      },
+      0,
+    );
+
+    setActiveIndex((currentIndex) =>
+      currentIndex === nextIndex ? currentIndex : nextIndex,
+    );
+  }
+
+  function goToSlide(index: number) {
+    const slide = sliderRef.current?.children.item(index);
+    if (!slide) return;
+
+    slide.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "nearest",
+      inline: "start",
+    });
+    setActiveIndex(index);
+  }
 
   /* Derive count label e.g. "05 PROJECTS" */
   const countLabel = projects?.length
@@ -182,19 +220,84 @@ export default function Projects() {
           </div>
         )}
 
-        {/* Projects grid */}
+        {/* Projects slider */}
         {!isLoading && !isError && projects && projects.length > 0 && (
-          <div className="proj-grid">
+          <div
+            className="proj-carousel"
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="Selected projects"
+          >
+            <div
+              ref={sliderRef}
+              className="proj-slider-track"
+              onScroll={updateActiveSlide}
+              tabIndex={0}
+              aria-label="Project slides"
+            >
             {projects.map((project, index) => (
-              <PortfolioCard
+              <div
                 key={project.id}
-                project={project}
-                index={index}
-                cardRef={(el) => {
-                  cardRefs.current[index] = el;
-                }}
-              />
+                className="proj-slider-slide"
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${index + 1} of ${projects.length}: ${project.name || project.Name || "Untitled Project"}`}
+              >
+                <PortfolioCard
+                  project={project}
+                  index={index}
+                  cardRef={(el) => {
+                    cardRefs.current[index] = el;
+                  }}
+                />
+              </div>
             ))}
+            </div>
+
+            {projects.length > 1 && (
+              <div className="proj-slider-controls">
+                <p className="proj-slider-position" aria-live="polite">
+                  <span>{String(activeIndex + 1).padStart(2, "0")}</span>
+                  <span className="proj-slider-position-divider">/</span>
+                  {String(projects.length).padStart(2, "0")}
+                </p>
+
+                <div className="proj-slider-progress" aria-hidden="true">
+                  {projects.map((project, index) => (
+                    <button
+                      key={project.id}
+                      type="button"
+                      className={`proj-slider-progress-step${activeIndex === index ? " is-active" : ""}`}
+                      onClick={() => goToSlide(index)}
+                      aria-label={`Go to project ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <div className="proj-slider-buttons">
+                  <button
+                    type="button"
+                    className="proj-slider-button"
+                    aria-label="Previous project"
+                    onClick={() => goToSlide(Math.max(0, activeIndex - 1))}
+                    disabled={activeIndex === 0}
+                  >
+                    <ArrowLeft size={18} strokeWidth={1.5} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className="proj-slider-button"
+                    aria-label="Next project"
+                    onClick={() =>
+                      goToSlide(Math.min(projects.length - 1, activeIndex + 1))
+                    }
+                    disabled={activeIndex === projects.length - 1}
+                  >
+                    <ArrowRight size={18} strokeWidth={1.5} aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
