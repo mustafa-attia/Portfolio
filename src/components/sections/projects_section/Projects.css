@@ -144,9 +144,8 @@
 }
 
 .proj-slider-slide {
-  flex: 0 0 82%;
+  flex: 0 0 calc((100% - var(--slider-gap)) / 2);
   min-width: 0;
-  max-width: 920px;
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
@@ -641,10 +640,6 @@
 @media (max-width: 860px) {
   .proj-grid {
     grid-template-columns: 1fr;
-  }
-
-  .proj-slider-slide {
-    flex-basis: 88%;
   }
 }
 
