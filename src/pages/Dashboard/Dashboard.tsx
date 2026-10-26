@@ -12,6 +12,7 @@ import ProjectCard from "../../components/dashboard/ProjectCard";
 import ProjectForm from "../../components/dashboard/ProjectForm";
 import usePageMetadata from "../../hooks/usePageMetadata";
 import { signOut } from "../../services/auth";
+import { getProjectApiErrorMessage } from "../../services/service.Projects";
 import "../../styles/AdminTheme.css";
 
 import type { Project } from "../../types/dashboard.types";
@@ -54,6 +55,13 @@ export default function Dashboard() {
   const [editingProject, setEditingProject] =
     useState<Project | null>(null);
   const [feedback, setFeedback] = useState("");
+  const isFeedbackError =
+    feedback !== "" &&
+    ![
+      "Project updated successfully.",
+      "Project added successfully.",
+      "Project deleted successfully.",
+    ].includes(feedback);
 
   const projectsQuery = useProjects();
   const addMutation = useAddProject();
@@ -124,8 +132,8 @@ export default function Dashboard() {
 
       resetForm();
       setActiveTab("Projects");
-    } catch {
-      setFeedback("Failed to save project. Please try again.");
+    } catch (error: unknown) {
+      setFeedback(getProjectApiErrorMessage(error));
     }
   }
 
@@ -141,8 +149,8 @@ export default function Dashboard() {
     try {
       await deleteMutation.mutateAsync(id);
       setFeedback("Project deleted successfully.");
-    } catch {
-      setFeedback("Failed to delete project. Please try again.");
+    } catch (error: unknown) {
+      setFeedback(getProjectApiErrorMessage(error));
     }
   }
 
@@ -267,13 +275,14 @@ export default function Dashboard() {
           <div
             role="status"
             className={`mb-6 rounded-xl border px-4 py-3 text-sm ${
-              projectsQuery.isError && !projectsQuery.data
+              (projectsQuery.isError && !projectsQuery.data) ||
+              isFeedbackError
                 ? "border-red-400/20 bg-red-400/5 text-red-300"
                 : "border-emerald-400/20 bg-emerald-400/5 text-emerald-300"
             }`}
           >
             {projectsQuery.isError && !projectsQuery.data
-              ? "Failed to load projects. Please check your API."
+              ? getProjectApiErrorMessage(projectsQuery.error)
               : feedback}
           </div>
         )}

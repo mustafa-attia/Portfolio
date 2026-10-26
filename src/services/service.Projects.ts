@@ -10,6 +10,48 @@ const projectsApi = axios.create({
   baseURL: Api_Url,
 });
 
+export function getProjectApiErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const responseData: unknown = error.response?.data;
+    let detail: string | undefined;
+
+    if (typeof responseData === "string" && !responseData.trimStart().startsWith("<")) {
+      detail = responseData.trim();
+    } else if (typeof responseData === "object" && responseData !== null) {
+      const data = responseData as Record<string, unknown>;
+      const message =
+        data.message ??
+        data.Message ??
+        data.error ??
+        data.Error ??
+        data.title ??
+        data.Title ??
+        data.detail ??
+        data.Detail;
+      if (typeof message === "string") detail = message.trim();
+    }
+
+    if (detail) detail = detail.slice(0, 240);
+
+    if (error.response) {
+      return `Projects API returned HTTP ${error.response.status}${
+        detail ? `: ${detail}` : "."
+      }`;
+    }
+
+    if (error.code === "ERR_NETWORK") {
+      return "Could not reach the projects API. Check VITE_Api_Url and the API server's CORS settings.";
+    }
+
+    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
+      return "The projects API request timed out. Please try again.";
+    }
+  }
+
+  if (error instanceof Error) return error.message;
+  return "An unexpected projects API error occurred.";
+}
+
 function asArray<T>(value: T | T[] | undefined | null): T[] {
   if (Array.isArray(value)) return value.filter(Boolean);
   if (value == null) return [];
