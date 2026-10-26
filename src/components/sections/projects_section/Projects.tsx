@@ -168,17 +168,26 @@ export default function Projects() {
     );
   }
 
-  function goToSlide(index: number) {
-    const slide = sliderRef.current?.children.item(index);
-    if (!slide) return;
+  function scrollToSlide(index: number, behavior: ScrollBehavior) {
+    const slider = sliderRef.current;
+    const slide = slider?.children.item(index);
+    if (!slider || !slide) return;
 
-    slide.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const sliderLeft = slider.getBoundingClientRect().left;
+    const slideLeft = slide.getBoundingClientRect().left;
+    slider.scrollTo({
+      left: slider.scrollLeft + slideLeft - sliderLeft,
+      behavior,
+    });
+  }
+
+  function goToSlide(index: number) {
+    scrollToSlide(
+      index,
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? "auto"
         : "smooth",
-      block: "nearest",
-      inline: "start",
-    });
+    );
     setActiveIndex(index);
   }
 
@@ -206,14 +215,7 @@ export default function Projects() {
       const currentPage = Math.floor(activeIndex / slidesPerPage);
       const nextPage = (currentPage + 1) % pageCount;
       const nextIndex = nextPage * slidesPerPage;
-      const slide = sliderRef.current?.children.item(nextIndex);
-      if (!slide) return;
-
-      slide.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "start",
-      });
+      scrollToSlide(nextIndex, "smooth");
       setActiveIndex(nextIndex);
     }, 5500);
 
