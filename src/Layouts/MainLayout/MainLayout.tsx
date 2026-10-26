@@ -42,7 +42,6 @@ export default function MainLayout() {
             : "smooth",
           block: "start",
         });
-        window.history.replaceState(null, "", destination);
         return;
       }
     }
