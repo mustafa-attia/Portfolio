@@ -4,11 +4,30 @@ import type {
   ProjectPayload,
 } from "../types/dashboard.types";
 
-const Api_Url = import.meta.env.VITE_Api_Url;
+const Api_Url = import.meta.env.VITE_Api_Url?.trim();
 
 const projectsApi = axios.create({
   baseURL: Api_Url,
 });
+
+function ensureProjectsApiConfigured(): void {
+  if (!Api_Url) {
+    throw new Error(
+      "Projects API is not configured. Set VITE_Api_Url in Vercel to the full MockAPI resource URL, then redeploy.",
+    );
+  }
+
+  try {
+    const apiUrl = new URL(Api_Url);
+    if (apiUrl.protocol !== "http:" && apiUrl.protocol !== "https:") {
+      throw new Error();
+    }
+  } catch {
+    throw new Error(
+      "VITE_Api_Url must be a full HTTP or HTTPS URL. Update it in Vercel and redeploy.",
+    );
+  }
+}
 
 export function getProjectApiErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -99,6 +118,7 @@ function extractProjectArray(data: unknown): Project[] {
 }
 
 export async function getProjects(): Promise<Project[]> {
+  ensureProjectsApiConfigured();
   const response = await projectsApi.get<unknown>("");
   const rawProjects = extractProjectArray(response.data);
 
@@ -145,6 +165,7 @@ export async function getProjects(): Promise<Project[]> {
 export async function addProject(
   projectData: ProjectPayload
 ) {
+  ensureProjectsApiConfigured();
   const response = await projectsApi.post("", projectData);
   return response.data;
 }
@@ -153,6 +174,7 @@ export async function updateProject(
   id: Project["id"],
   projectData: ProjectPayload
 ) {
+  ensureProjectsApiConfigured();
   const response = await projectsApi.put(`/${id}`, projectData);
   return response.data;
 }
@@ -160,5 +182,6 @@ export async function updateProject(
 export async function deleteProject(
   id: Project["id"]
 ) {
+  ensureProjectsApiConfigured();
   await projectsApi.delete(`/${id}`);
 }

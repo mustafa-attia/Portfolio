@@ -6,14 +6,19 @@ The dashboard checks credentials through a Vercel serverless function. In the
 Vercel project settings, add these environment variables for every deployment
 environment you use, then redeploy:
 
+- `VITE_Api_Url` — the full projects resource URL, for example
+  `https://<your-mockapi-id>.mockapi.io/v1/projectCard`
 - `ADMIN_EMAIL` — dashboard login email
 - `ADMIN_PASSWORD` — dashboard login password
 - `AUTH_SESSION_SECRET` — a unique, randomly generated secret used to sign
   session cookies
 
-Do not prefix these variables with `VITE_`; server-side credentials must not be
-included in the browser bundle. For local testing with Vercel's development
-server, put the same variable names in `.env.local` and run `vercel dev`.
+`VITE_Api_Url` is a public API address and must use the exact spelling shown.
+It is embedded in the frontend when Vite builds the site, so setting or changing
+it in Vercel requires a new deployment. Do not prefix the credentials with
+`VITE_`; server-side credentials must not be included in the browser bundle.
+For local testing with Vercel's development server, put the same variable
+names in `.env.local` and run `vercel dev`.
 
 ## Development
 
