@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { projectKeys } from "../../../queries/projects.queries";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 import gsap from "gsap";
 import PortfolioCard from "./ProjectCard";
 import "./Projects.css";
@@ -37,7 +37,16 @@ export default function Projects() {
   const countRef        = useRef<HTMLSpanElement>(null);
   const cardRefs        = useRef<(HTMLElement | null)[]>([]);
   const sliderRef       = useRef<HTMLDivElement>(null);
+  const pointerInsideRef = useRef(false);
+  const focusInsideRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [slidesPerPage, setSlidesPerPage] = useState(() =>
+    window.matchMedia("(max-width: 600px)").matches ? 1 : 2,
+  );
 
   /* ── Entrance animation ─────────────────────────────────────────────── */
   useEffect(() => {
@@ -112,6 +121,32 @@ export default function Projects() {
     return () => observer.disconnect();
   }, [projects]);
 
+  useEffect(() => {
+    const mobileQuery = window.matchMedia("(max-width: 600px)");
+    const updateSlidesPerPage = () => {
+      setSlidesPerPage(mobileQuery.matches ? 1 : 2);
+    };
+
+    updateSlidesPerPage();
+    mobileQuery.addEventListener("change", updateSlidesPerPage);
+
+    return () => {
+      mobileQuery.removeEventListener("change", updateSlidesPerPage);
+    };
+  }, []);
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotionPreference = () => {
+      setPrefersReducedMotion(motionQuery.matches);
+    };
+
+    motionQuery.addEventListener("change", updateMotionPreference);
+    return () => {
+      motionQuery.removeEventListener("change", updateMotionPreference);
+    };
+  }, []);
+
   function updateActiveSlide() {
     const slider = sliderRef.current;
     if (!slider) return;
@@ -146,6 +181,52 @@ export default function Projects() {
     });
     setActiveIndex(index);
   }
+
+  useEffect(() => {
+    const pageCount = Math.ceil((projects?.length ?? 0) / slidesPerPage);
+    if (
+      isLoading ||
+      isError ||
+      pageCount < 2 ||
+      isAutoplayPaused ||
+      prefersReducedMotion
+    ) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      if (
+        document.hidden ||
+        pointerInsideRef.current ||
+        focusInsideRef.current
+      ) {
+        return;
+      }
+
+      const currentPage = Math.floor(activeIndex / slidesPerPage);
+      const nextPage = (currentPage + 1) % pageCount;
+      const nextIndex = nextPage * slidesPerPage;
+      const slide = sliderRef.current?.children.item(nextIndex);
+      if (!slide) return;
+
+      slide.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "start",
+      });
+      setActiveIndex(nextIndex);
+    }, 5500);
+
+    return () => window.clearInterval(intervalId);
+  }, [
+    activeIndex,
+    isAutoplayPaused,
+    isError,
+    isLoading,
+    prefersReducedMotion,
+    projects?.length,
+    slidesPerPage,
+  ]);
 
   /* Derive count label e.g. "05 PROJECTS" */
   const countLabel = projects?.length
@@ -227,6 +308,23 @@ export default function Projects() {
             role="region"
             aria-roledescription="carousel"
             aria-label="Selected projects"
+            onMouseEnter={() => {
+              pointerInsideRef.current = true;
+            }}
+            onMouseLeave={() => {
+              pointerInsideRef.current = false;
+            }}
+            onFocusCapture={() => {
+              focusInsideRef.current = true;
+            }}
+            onBlurCapture={(event) => {
+              if (
+                !(event.relatedTarget instanceof Node) ||
+                !event.currentTarget.contains(event.relatedTarget)
+              ) {
+                focusInsideRef.current = false;
+              }
+            }}
           >
             <div
               ref={sliderRef}
@@ -257,24 +355,48 @@ export default function Projects() {
             {projects.length > 1 && (
               <div className="proj-slider-controls">
                 <p className="proj-slider-position" aria-live="polite">
-                  <span>{String(activeIndex + 1).padStart(2, "0")}</span>
+                  <span>
+                    {String(Math.floor(activeIndex / slidesPerPage) + 1).padStart(2, "0")}
+                  </span>
                   <span className="proj-slider-position-divider">/</span>
-                  {String(projects.length).padStart(2, "0")}
+                  {String(Math.ceil(projects.length / slidesPerPage)).padStart(2, "0")}
                 </p>
 
-                <div className="proj-slider-progress" aria-hidden="true">
-                  {projects.map((project, index) => (
+                <div className="proj-slider-progress">
+                  {Array.from(
+                    { length: Math.ceil(projects.length / slidesPerPage) },
+                    (_, pageIndex) => (
                     <button
-                      key={project.id}
+                      key={pageIndex}
                       type="button"
-                      className={`proj-slider-progress-step${activeIndex === index ? " is-active" : ""}`}
-                      onClick={() => goToSlide(index)}
-                      aria-label={`Go to project ${index + 1}`}
+                      className={`proj-slider-progress-step${
+                        Math.floor(activeIndex / slidesPerPage) === pageIndex
+                          ? " is-active"
+                          : ""
+                      }`}
+                      onClick={() => goToSlide(pageIndex * slidesPerPage)}
+                      aria-label={`Go to project page ${pageIndex + 1}`}
                     />
-                  ))}
+                    ),
+                  )}
                 </div>
 
                 <div className="proj-slider-buttons">
+                  <button
+                    type="button"
+                    className="proj-slider-button proj-slider-autoplay"
+                    aria-label={
+                      isAutoplayPaused ? "Resume automatic sliding" : "Pause automatic sliding"
+                    }
+                    aria-pressed={isAutoplayPaused}
+                    onClick={() => setIsAutoplayPaused((paused) => !paused)}
+                  >
+                    {isAutoplayPaused ? (
+                      <Play size={16} strokeWidth={1.5} aria-hidden="true" />
+                    ) : (
+                      <Pause size={16} strokeWidth={1.5} aria-hidden="true" />
+                    )}
+                  </button>
                   <button
                     type="button"
                     className="proj-slider-button"
