@@ -62,7 +62,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
       "",
       `Message: ${String(formData.get("message") ?? "").trim()}`,
     ].join("\n");
-    const whatsappUrl = `https://wa.me/201012792218?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/201017048275?text=${encodeURIComponent(message)}`;
 
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
     onClose();
