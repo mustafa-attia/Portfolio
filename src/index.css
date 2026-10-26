@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  --olive-primary: #6d7d45;
+  --olive-dark: #4d5f31;
+  --olive-soft: #edf2df;
+  --olive-accent: #aab984;
+  --olive-ink: #22301b;
+  --page-bg: #f4f6ee;
+  --surface: #ffffff;
+  --surface-alt: #edf2df;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+  background: var(--page-bg);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--olive-ink);
+  font-size: 14px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.route-loading {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  color: var(--olive-dark);
+  font-family: Georgia, serif;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--olive-primary);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+::selection {
+  background: rgba(109, 125, 69, 0.2);
+  color: var(--olive-ink);
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b9c6a6;
+  border-radius: 10px;
+}
+
+@media (min-width: 768px) {
+  body.custom-cursor-active,
+  body.custom-cursor-active a,
+  body.custom-cursor-active button,
+  body.custom-cursor-active input,
+  body.custom-cursor-active select,
+  body.custom-cursor-active textarea,
+  body.custom-cursor-active [role="button"] {
+    cursor: none;
+  }
+}
+

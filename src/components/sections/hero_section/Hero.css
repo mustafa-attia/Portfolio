@@ -1,0 +1,348 @@
+.hero-section {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.hero-section::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3Cpath d='M90 0 L0 90 M90 90 L180 180' fill='none' stroke='%23000000' stroke-width='1.25' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-position: center;
+  background-size: 90px 90px;
+  content: "";
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 100vh;
+  min-height: 100svh;
+  align-items: center;
+  justify-content: center;
+  padding: 110px 24px 100px;
+}
+
+.hero-copy {
+  width: min(100%, 1000px);
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border: 1px solid rgba(96, 107, 69, 0.18);
+  border-radius: 999px;
+  background: rgba(96, 107, 69, 0.05);
+  color: #606b45;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero-badge-dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: #606b45;
+}
+
+.hero-badge-dot::after {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid #606b45;
+  border-radius: inherit;
+  animation: badge-ring 2.2s ease-out infinite;
+  content: "";
+}
+
+.hero-title {
+  max-width: 1000px;
+  margin: 26px auto 24px;
+  color: #1d211b;
+  font-size: clamp(2.5rem, 7vw, 7.5rem);
+  font-weight: 800;
+  letter-spacing: -0.065em;
+  line-height: 0.98;
+}
+
+.hero-line {
+  display: block;
+}
+
+.hero-highlight {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  width: 8.4ch;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #606b45;
+  cursor: pointer;
+  font: italic 400 1em/1.05 "Playfair Display", Georgia, serif;
+  letter-spacing: -0.045em;
+  text-align: center;
+  vertical-align: baseline;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-highlight:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid #606b45;
+  outline-offset: 7px;
+}
+
+.hero-word-box {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  padding: 0 0.08em;
+  animation: hero-word-enter 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.hero-word-mask {
+  display: block;
+  overflow: hidden;
+  padding-top: 0.08em;
+  padding-bottom: 0.22em;
+  margin-top: -0.08em;
+  margin-bottom: -0.22em;
+}
+
+.hero-word-text {
+  display: inline-block;
+}
+
+.hero-word-line {
+  position: absolute;
+  left: 0;
+  bottom: -0.13em;
+  width: 100%;
+  height: 0.19em;
+  overflow: visible;
+}
+
+.hero-word-line path {
+  fill: none;
+  stroke: #606b45;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  animation: hero-curve-draw 700ms 100ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.hero-description {
+  max-width: 720px;
+  margin: 0 auto;
+  color: rgba(29, 33, 27, 0.74);
+  font-size: clamp(0.98rem, 1.7vw, 1.25rem);
+  line-height: 1.8;
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  z-index: 1;
+  bottom: 24px;
+  left: 50%;
+  display: flex;
+  min-width: 120px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(29, 33, 27, 0.62);
+  cursor: pointer;
+  font: inherit;
+  transform: translateX(-50%);
+}
+
+.hero-scroll-indicator:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.hero-scroll-line {
+  width: 1px;
+  height: 22px;
+  background: linear-gradient(to bottom, transparent, rgba(96, 107, 69, 0.65));
+  animation: scroll-line 1.8s ease-in-out infinite;
+}
+
+.hero-scroll-mouse {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 27px;
+  border: 1px solid rgba(29, 33, 27, 0.55);
+  border-radius: 10px;
+}
+
+.hero-scroll-dot {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: 2px;
+  height: 5px;
+  border-radius: 2px;
+  background: #606b45;
+  animation: scroll-dot 1.5s ease-in-out infinite;
+}
+
+.hero-scroll-label {
+  margin-top: 2px;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color 180ms ease;
+}
+
+.hero-scroll-indicator:not(:disabled):hover {
+  color: #606b45;
+}
+
+.hero-scroll-indicator:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid #606b45;
+  outline-offset: 5px;
+}
+
+.hero-scroll-indicator:not(:disabled):hover .hero-scroll-label {
+  color: #606b45;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes badge-ring {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.65);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+
+@keyframes hero-word-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-curve-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes scroll-line {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scaleY(0.78);
+    transform-origin: top;
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes scroll-dot {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 9px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-badge,
+  .hero-badge-dot::after,
+  .hero-word-box,
+  .hero-word-line,
+  .hero-scroll-line,
+  .hero-scroll-dot {
+    animation: none;
+  }
+
+  .hero-word-line path {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-content {
+    min-height: 100svh;
+    padding: 100px 18px 118px;
+  }
+
+  .hero-title {
+    margin: 24px auto 20px;
+    font-size: clamp(2.3rem, 10vw, 4rem);
+    letter-spacing: -0.06em;
+  }
+
+  .hero-description {
+    max-width: 34rem;
+    font-size: 0.98rem;
+  }
+
+  .hero-scroll-indicator {
+    bottom: 15px;
+  }
+
+  .hero-scroll-line {
+    height: 14px;
+  }
+
+  .hero-scroll-mouse {
+    width: 16px;
+    height: 23px;
+  }
+
+  .hero-scroll-label {
+    font-size: 0.52rem;
+  }
+}

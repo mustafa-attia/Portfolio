@@ -1,0 +1,46 @@
+.not-found-page {
+  display: flex;
+  min-height: 70vh;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 140px max(24px, calc((100vw - 1120px) / 2));
+  background: #faf8f5;
+  color: #211c1b;
+}
+
+.not-found-eyebrow {
+  margin: 0 0 18px;
+  color: #606b45;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+}
+
+.not-found-page h1 {
+  max-width: 760px;
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(42px, 8vw, 76px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.not-found-page > p:not(.not-found-eyebrow) {
+  margin: 18px 0 28px;
+  color: rgba(33, 28, 27, 0.64);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.not-found-page a {
+  color: #606b45;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.not-found-page a:focus-visible {
+  outline: 2px solid #606b45;
+  outline-offset: 4px;
+}
