@@ -1,7 +1,9 @@
 
-import { useState } from "react";
-import { Navigate, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { Navigate } from "react-router";
 import usePageMetadata from "../../hooks/usePageMetadata";
+import RouteLoadingFallback from "../../components/RouteLoadingFallback";
+import { checkAuthSession, signIn } from "../../services/auth";
 import "../../styles/AdminTheme.css";
 
 export default function Login() {
@@ -10,32 +12,78 @@ export default function Login() {
     "Sign in to the private portfolio management workspace.",
     false,
   );
-  const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isAuthenticated =
-    sessionStorage.getItem("isLoggedIn") === "true";
+  useEffect(() => {
+    let active = true;
+
+    checkAuthSession()
+      .then((authenticated) => {
+        if (active) setIsAuthenticated(authenticated);
+      })
+      .catch((authError: unknown) => {
+        if (active) {
+          setError(
+            authError instanceof Error
+              ? authError.message
+              : "Unable to verify your session.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setIsCheckingSession(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      if (await signIn(email, password)) {
+        setIsAuthenticated(true);
+      } else {
+        setError("The email or password you entered is incorrect.");
+      }
+    } catch (authError: unknown) {
+      setError(
+        authError instanceof Error
+          ? authError.message
+          : "Unable to sign in right now. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  if (isCheckingSession) return <RouteLoadingFallback />;
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  function handleLogin(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const pass = import.meta.env.VITE_Admin_Pass;
-    const mail = import.meta.env.VITE_Admin_Email;
+  function clearError() {
+    setError("");
+  }
 
-    if (
-      password === pass &&
-      email.trim().toLowerCase() === String(mail).trim().toLowerCase()
-    ) {
-      sessionStorage.setItem("isLoggedIn", "true");
-      navigate("/dashboard", { replace: true });
-    } else {
-      setError("The email or password you entered is incorrect.");
-    }
+  function handleEmailChange(value: string) {
+    setEmail(value);
+    clearError();
+  }
+
+  function handlePasswordChange(value: string) {
+    setPassword(value);
+    clearError();
   }
 
   return (
@@ -57,10 +105,7 @@ export default function Login() {
             type="email"
             autoComplete="username"
             value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              setError("");
-            }}
+            onChange={(event) => handleEmailChange(event.target.value)}
             placeholder="you@example.com"
             required
           />
@@ -71,10 +116,7 @@ export default function Login() {
             type="password"
             autoComplete="current-password"
             value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              setError("");
-            }}
+            onChange={(event) => handlePasswordChange(event.target.value)}
             placeholder="Enter your password"
             required
           />
@@ -82,8 +124,13 @@ export default function Login() {
 
         {error && <p className="login-error" role="alert">{error}</p>}
 
-        <button type="submit" className="login-submit">
-          Sign in <span aria-hidden="true">↗</span>
+        <button
+          type="submit"
+          className="login-submit"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Signing in…" : "Sign in"}{" "}
+          <span aria-hidden="true">↗</span>
         </button>
 
         <p className="login-footer">AUTHORIZED ACCESS ONLY</p>

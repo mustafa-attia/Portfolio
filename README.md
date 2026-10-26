@@ -1,5 +1,22 @@
 # React + TypeScript + Vite
 
+## Dashboard authentication on Vercel
+
+The dashboard checks credentials through a Vercel serverless function. In the
+Vercel project settings, add these environment variables for every deployment
+environment you use, then redeploy:
+
+- `ADMIN_EMAIL` — dashboard login email
+- `ADMIN_PASSWORD` — dashboard login password
+- `AUTH_SESSION_SECRET` — a unique, randomly generated secret used to sign
+  session cookies
+
+Do not prefix these variables with `VITE_`; server-side credentials must not be
+included in the browser bundle. For local testing with Vercel's development
+server, put the same variable names in `.env.local` and run `vercel dev`.
+
+## Development
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

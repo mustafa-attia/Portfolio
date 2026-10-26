@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import {
   useAddProject,
@@ -11,6 +11,7 @@ import {
 import ProjectCard from "../../components/dashboard/ProjectCard";
 import ProjectForm from "../../components/dashboard/ProjectForm";
 import usePageMetadata from "../../hooks/usePageMetadata";
+import { signOut } from "../../services/auth";
 import "../../styles/AdminTheme.css";
 
 import type { Project } from "../../types/dashboard.types";
@@ -73,10 +74,6 @@ export default function Dashboard() {
       .toLowerCase()
       .includes(search.trim().toLowerCase())
   );
-
-  if (sessionStorage.getItem("isLoggedIn") !== "true") {
-    return <Navigate to="/login" replace />;
-  }
 
   function resetForm() {
     setForm(emptyForm);
@@ -149,9 +146,17 @@ export default function Dashboard() {
     }
   }
 
-  function logout() {
-    sessionStorage.removeItem("isLoggedIn");
-    navigate("/login", { replace: true });
+  async function logout() {
+    try {
+      await signOut();
+      navigate("/login", { replace: true });
+    } catch (error: unknown) {
+      setFeedback(
+        error instanceof Error
+          ? error.message
+          : "Unable to log out right now. Please try again.",
+      );
+    }
   }
 
   return (
